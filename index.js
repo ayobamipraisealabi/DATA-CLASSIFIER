@@ -25,6 +25,14 @@ db.exec(`
   )
 `);
 
+app.get('/', (req, res) => {
+  res.json({
+    status: "success",
+    message: "Data Classifier is live",
+    endpoints: "/api/profiles (POST/GET) | /api/profiles/{id} | DELETE /api/profiles/{id}"
+  });
+});
+
 const fetchApi = async (url, apiName) => {
   try {
     const { data } = await axios.get(url);
