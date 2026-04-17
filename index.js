@@ -4,6 +4,8 @@ import Database from 'better-sqlite3';
 import { v7 as uuidv7 } from 'uuid';
 import axios from 'axios';
 
+const path = require('path');
+
 const app = express();
 app.use(cors({ origin: '*' }));
 app.use(express.json());
@@ -26,11 +28,7 @@ db.exec(`
 `);
 
 app.get('/', (req, res) => {
-  res.json({
-    status: "success",
-    message: "Data Classifier is live",
-    endpoints: "/api/profiles (POST/GET) | /api/profiles/{id} | DELETE /api/profiles/{id}"
-  });
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 const fetchApi = async (url, apiName) => {
