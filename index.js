@@ -3,8 +3,10 @@ import cors from 'cors';
 import Database from 'better-sqlite3';
 import { v7 as uuidv7 } from 'uuid';
 import axios from 'axios';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const path = import('path');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 app.use(cors({ origin: '*' }));
