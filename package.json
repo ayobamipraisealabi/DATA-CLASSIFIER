@@ -1,0 +1,21 @@
+{
+  "name": "data-classifier",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.2",
+    "better-sqlite3": "^11.8.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "uuid": "^10.0.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
