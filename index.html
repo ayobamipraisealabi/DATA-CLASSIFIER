@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Classifier API Client</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f7f8fb;
+      color: #20232a;
+    }
+    .container {
+      max-width: 960px;
+      margin: 24px auto;
+      padding: 24px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+    }
+    h1, h2 {
+      margin: 0 0 16px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    input, select, button, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 16px;
+      border: 1px solid #d7dae0;
+      border-radius: 8px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    button {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1d4ed8;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .box {
+      padding: 16px;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      background: #fafafa;
+    }
+    pre {
+      white-space: pre-wrap;
+      background: #f3f4f6;
+      padding: 16px;
+      border-radius: 10px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Data Classifier API Client</h1>
+    <p>Use this UI to create, view, filter, and delete profiles against your deployed backend.</p>
+
+    <div class="row">
+      <div class="box">
+        <h2>Create Profile</h2>
+        <label for="create-name">Name</label>
+        <input id="create-name" type="text" placeholder="Enter a name" />
+        <button id="create-button">Create Profile</button>
+      </div>
+
+      <div class="box">
+        <h2>Get Profile by ID</h2>
+        <label for="get-id">Profile ID</label>
+        <input id="get-id" type="text" placeholder="Enter profile id" />
+        <button id="get-button">Fetch Profile</button>
+      </div>
+
+      <div class="box">
+        <h2>Filter Profiles</h2>
+        <label for="filter-gender">Gender</label>
+        <input id="filter-gender" type="text" placeholder="male, female, or leave blank" />
+        <label for="filter-country">Country ID</label>
+        <input id="filter-country" type="text" placeholder="NG, US, etc." />
+        <label for="filter-age-group">Age Group</label>
+        <input id="filter-age-group" type="text" placeholder="child, teenager, adult, senior" />
+        <button id="filter-button">Fetch Profiles</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="box">
+        <h2>Delete Profile</h2>
+        <label for="delete-id">Profile ID</label>
+        <input id="delete-id" type="text" placeholder="Enter profile id" />
+        <button id="delete-button">Delete Profile</button>
+      </div>
+
+      <div class="box">
+        <h2>Response</h2>
+        <pre id="response-output">No requests yet.</pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const apiBase = window.location.origin;
+    const output = document.getElementById('response-output');
+
+    function showResult(result) {
+      output.textContent = JSON.stringify(result, null, 2);
+    }
+
+    async function request(endpoint, options = {}) {
+      try {
+        const response = await fetch(endpoint, options);
+        const contentType = response.headers.get('content-type') || '';
+        if (!response.ok) {
+          const payload = contentType.includes('application/json') ? await response.json() : await response.text();
+          throw new Error(payload.message || payload || response.statusText);
+        }
+        if (contentType.includes('application/json')) {
+          return await response.json();
+        }
+        return { status: 'success', data: await response.text() };
+      } catch (error) {
+        return { status: 'error', message: error.message };
+      }
+    }
+
+    document.getElementById('create-button').addEventListener('click', async () => {
+      const name = document.getElementById('create-name').value.trim();
+      if (!name) {
+        showResult({ status: 'error', message: 'Name is required' });
+        return;
+      }
+      const result = await request(`${apiBase}/api/profiles`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name })
+      });
+      showResult(result);
+    });
+
+    document.getElementById('get-button').addEventListener('click', async () => {
+      const id = document.getElementById('get-id').value.trim();
+      if (!id) {
+        showResult({ status: 'error', message: 'Profile ID is required' });
+        return;
+      }
+      const result = await request(`${apiBase}/api/profiles/${encodeURIComponent(id)}`);
+      showResult(result);
+    });
+
+    document.getElementById('filter-button').addEventListener('click', async () => {
+      const gender = document.getElementById('filter-gender').value.trim();
+      const country_id = document.getElementById('filter-country').value.trim();
+      const age_group = document.getElementById('filter-age-group').value.trim();
+      const params = new URLSearchParams();
+      if (gender) params.append('gender', gender);
+      if (country_id) params.append('country_id', country_id);
+      if (age_group) params.append('age_group', age_group);
+      const result = await request(`${apiBase}/api/profiles?${params.toString()}`);
+      showResult(result);
+    });
+
+    document.getElementById('delete-button').addEventListener('click', async () => {
+      const id = document.getElementById('delete-id').value.trim();
+      if (!id) {
+        showResult({ status: 'error', message: 'Profile ID is required' });
+        return;
+      }
+      const response = await fetch(`${apiBase}/api/profiles/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (response.status === 204) {
+        showResult({ status: 'success', message: 'Profile deleted' });
+      } else {
+        const payload = await response.json().catch(() => ({ message: response.statusText }));
+        showResult({ status: 'error', message: payload.message || 'Delete failed' });
+      }
+    });
+  </script>
+</body>
+</html>
