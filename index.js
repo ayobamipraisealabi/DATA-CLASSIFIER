@@ -4,7 +4,7 @@ import Database from 'better-sqlite3';
 import { v7 as uuidv7 } from 'uuid';
 import axios from 'axios';
 
-const path = require('path');
+const path = import('path');
 
 const app = express();
 app.use(cors({ origin: '*' }));
